@@ -28,8 +28,8 @@ var queryType = graphql.NewObject(
 	graphql.ObjectConfig{
 		Name: "Query",
 		Fields: graphql.Fields{
-			/* Get (read) single product by id
-			   http://localhost:8080/product?query={product(id:1){name,info,price}}
+			/* Get (read) admin users
+			   http://localhost:8085/users?query={admin{name}}
 			*/
 			"admin": &graphql.Field{
 				Type:        graphql.NewList(userType),
@@ -40,8 +40,8 @@ var queryType = graphql.NewObject(
 					return users, nil
 				},
 			},
-			/* Get (read) product list
-			   http://localhost:8080/product?query={list{id,name,info,price}}
+			/* Get (read) users list
+			   http://localhost:8085/users?query={list{name}}
 			*/
 			"list": &graphql.Field{
 				Type:        graphql.NewList(userType),
@@ -178,7 +178,7 @@ func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 }
 
 func main() {
-	http.HandleFunc("/product", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
 		result := executeQuery(r.URL.Query().Get("query"), schema)
 		json.NewEncoder(w).Encode(result)
 	})
