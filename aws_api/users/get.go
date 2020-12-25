@@ -9,7 +9,7 @@ import (
 )
 
 type Users struct {
-	ID   string  `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -18,58 +18,32 @@ func GetAll(getAdmin bool) (users []Users, err error) {
 
 	svc := iam.New(sess, &aws.Config{Region: aws.String("us-west-2")})
 
-	//user_filter := "User"
-	//input := &iam.GetAccountAuthorizationDetailsInput{Filter: []*string{&user_filter}}
-	//resp, err := svc.GetAccountAuthorizationDetails(input)
+	user_filter := "User"
+	input := &iam.GetAccountAuthorizationDetailsInput{Filter: []*string{&user_filter}}
+	resp, err := svc.GetAccountAuthorizationDetails(input)
 	if err != nil {
 		fmt.Println("Got error getting account details")
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 
-	//adminName := "AdministratorAccess"
-	//numUsers:=0
-	//numAdmins:=0
-	// Wade through resulting users
-	//for _, user := range resp.UserDetailList {
-	//	numUsers += 1
-	//	if getAdmin {
-	//	//	isAdmin := IsUserAdmin(svc, user, adminName)
-	//
-	//		//if isAdmin {
-	//		//	fmt.Println(*user.UserName)
-	//		//	numAdmins += 1
-	//		//}
-	//	}
-	//}
+	adminName := "AdministratorAccess"
 
-	result, err := svc.ListUsers(&iam.ListUsersInput{
-		MaxItems: aws.Int64(10),
-	})
-
-	if err != nil {
-		fmt.Println("Error", err)
-		return users , err
-	}
-
-	for _, user := range result.Users {
-		if user == nil {
-			continue
-		}
-
-		//if getAdmin {
-		//	isAdmin := IsUserAdmin(svc, user, adminName)
-		//}
+	for _, user := range resp.UserDetailList {
 		aws_user := Users{
-			ID: *user.Arn,
+			ID:   *user.Arn,
 			Name: *user.UserName,
 		}
-		users = append(users, aws_user)
-		fmt.Printf("User: %v \n", user)
 
-		//fmt.Printf("%d user %s created %v\n", i, *user.UserName, user.CreateDate)
+		if getAdmin {
+			isAdmin := IsUserAdmin(svc, user, adminName)
+			if isAdmin {
+				users = append(users, aws_user)
+			}
+		} else {
+			users = append(users, aws_user)
+		}
 	}
-	fmt.Printf("User: %v \n", users)
 
 	return users, nil
 }

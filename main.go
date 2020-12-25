@@ -35,7 +35,7 @@ var queryType = graphql.NewObject(
 				Type:        graphql.NewList(userType),
 				Description: "get Admin users",
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					var users, _ = users.GetAll(false)
+					var users, _ = users.GetAll(true)
 					fmt.Printf("User: %v \n", users)
 					return users, nil
 				},
